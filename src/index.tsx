@@ -22,6 +22,7 @@ export interface Cluster {
     };
     markers: Marker[];
   };
+  getCenterPosition: () => Region;
 }
 
 export type Marker = {
@@ -33,7 +34,6 @@ export type AnimatedMarker = {
   coordinate: AnimatedRegion;
   id: number | string;
   getCluster: (clusters: Cluster[]) => Cluster;
-  getAnimatingRegion: (cluster: Cluster) => Region;
 } & any;
 
 /**
@@ -50,34 +50,8 @@ function createAnimatedMarkers(markers: Marker[]): AnimatedMarker[] {
       longitudeDelta: marker.coordinate.longitudeDelta === undefined ? 0 : marker.coordinate.longitudeDelta,
     }),
     id: marker.id,
-
-    /**
-     * Get the cluster this marker belonging to
-     * @param clusters all the clusters
-     */
     getCluster: (clusters: Cluster[]) => {
       return clusters.find((cluster: Cluster) => (cluster.userExtension.markers || []).find((m) => m.id === marker.id));
-    },
-
-    /**
-     * Get the animating region.
-     * call when clustered marker clicks.
-     *
-     * @param cluster cluster this marker belonging to
-     */
-    getAnimatingRegion: (cluster: Cluster) => {
-      const latitudes = cluster.userExtension.markers.map((m) => m.latitude);
-      const longitudes = cluster.userExtension.markers.map((m) => m.longitude);
-      const maxLatitude = Math.max.apply(null, latitudes.map((m) => Math.abs(m)));
-      const maxLongitude = Math.max.apply(null, longitudes.map((m) => Math.abs(m)));
-      const minLatitude = Math.min.apply(null, latitudes.map((m) => Math.abs(m)));
-      const minLongitude = Math.min.apply(null, longitudes.map((m) => Math.abs(m)));
-      return {
-        latitude: marker.coordinate.latitude._value || marker.coordinate.latitude,
-        longitude: marker.coordinate.longitude._value || marker.coordinate.longitude,
-        longitudeDelta: maxLongitude - minLongitude || 0.1,
-        latitudeDelta: maxLatitude - minLatitude || 0.1,
-      };
     },
   }));
 }
@@ -102,6 +76,34 @@ function isSameCluster(currentClusters: Cluster[], nextClusters: Cluster[]): boo
     }
   }
   return true;
+}
+
+/**
+ * Get the center position of cluster
+ * @param cluster
+ * @param width
+ * @param height
+ */
+function getCenterPosition(cluster: Cluster, width: number, height: number): Region {
+  const latitudes = cluster.userExtension.markers.map((m) => m.latitude);
+  const longitudes = cluster.userExtension.markers.map((m) => m.longitude);
+  const maxLatitude = Math.max.apply(null, latitudes.map((m) => Math.abs(m)));
+  const maxLongitude = Math.max.apply(null, longitudes.map((m) => Math.abs(m)));
+  const minLatitude = Math.min.apply(null, latitudes.map((m) => Math.abs(m)));
+  const minLongitude = Math.min.apply(null, longitudes.map((m) => Math.abs(m)));
+  const _boundingBox: [number, number, number, number] = [
+    longitudes.find((l) => Math.abs(l) === minLongitude),
+    latitudes.find((l) => Math.abs(l) === minLatitude),
+    longitudes.find((l) => Math.abs(l) === maxLongitude),
+    latitudes.find((l) => Math.abs(l) === maxLatitude),
+  ];
+  const _viewport = GeoViewport.viewport(_boundingBox, [width, height]);
+  return {
+    latitude: _viewport.center[1],
+    longitude: _viewport.center[0],
+    longitudeDelta: maxLongitude - minLongitude || 0.1,
+    latitudeDelta: maxLatitude - minLatitude || 0.1,
+  };
 }
 
 type Props = {
@@ -181,6 +183,7 @@ export const withAnimatedCluster = (options: {
        */
       private initialize() {
         const animatedMarkers = createAnimatedMarkers(this.props.markers);
+        this.setState({ animatedMarkers });
 
         const defaultClusters = this.props.markers.map((marker: Marker) => ({
           type: 'Feature',
@@ -196,7 +199,6 @@ export const withAnimatedCluster = (options: {
         this.superCluster.load(defaultClusters);
 
         this.onRegionChanged(this.state.region);
-        this.setState({ animatedMarkers });
       }
 
       /**
@@ -246,11 +248,14 @@ export const withAnimatedCluster = (options: {
               this.addMarkersToTopCluster(child, cluster.userExtension.markers);
             });
           }
+
+          cluster.getCenterPosition = () => getCenterPosition(cluster, options.width, options.height);
         });
 
         // @ts-ignore
         this.animateMarkersIfNeeded(clusters);
-        this.setState({ region });
+
+        this.setState({ region, clusters });
       }
 
       /**
@@ -284,8 +289,6 @@ export const withAnimatedCluster = (options: {
             }
           });
         }
-
-        this.setState({ clusters: nextClusters });
       }
 
       /**
