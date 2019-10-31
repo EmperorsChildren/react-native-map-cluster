@@ -3,7 +3,6 @@
 [cmapper](https://apps.apple.com/jp/app/cmapper/id935586290) or [8xplorer](https://apps.apple.com/app/apple-store/id1460433285?mt=8&l=ja) like smooth map clustering library
 
 ![demo](/image/anim.gif)
-![demo](/image/anim2.gif)
 
 ## Installation
 
