@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "postinstall": "mkdir -p node_modules/react-native-map-cluster/lib && cp ../../lib/* node_modules/react-native-map-cluster/lib/ && cp ../../package.json node_modules/react-native-map-cluster/",
-    "start": "react-native start",
-    "test": "jest"
+    "android": "react-native run-android",
+    "ios": "react-native run-ios"
   },
   "dependencies": {
     "react": "16.8.6",

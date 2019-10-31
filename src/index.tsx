@@ -2,6 +2,7 @@ import * as React from 'react';
 
 // @ts-ignore
 import * as GeoViewport from '@mapbox/geo-viewport';
+import { Platform } from 'react-native';
 import { AnimatedRegion, Region } from 'react-native-maps';
 import Supercluster from 'supercluster';
 
@@ -145,21 +146,17 @@ function animateMarkersIfNeeded(
       const stayCluster = nextClusters.find((cluster: Cluster) =>
         cluster.userExtension.markers.find((m) => m.id === marker.id),
       );
-      if (stayCluster) {
-        // Clustering
-        const animation = animatedMarkers[index].coordinate.timing({
-          ...stayCluster.userExtension.coordinate,
-          duration,
-        });
-        animation.start();
+      const coordinate = stayCluster ? stayCluster.userExtension.coordinate : marker.coordinate;
+      if (Platform.OS === 'android') {
+        // @ts-ignore
+        animatedMarkers[index].coordinate._component.animateMarkerToCoordinate(coordinate, duration);
       } else {
-        // Release
-        const animation = animatedMarkers[index].coordinate.timing({
-          latitude: marker.coordinate.latitude,
-          longitude: marker.coordinate.longitude,
-          duration,
-        });
-        animation.start();
+        animatedMarkers[index].coordinate
+          .timing({
+            ...coordinate,
+            duration,
+          })
+          .start();
       }
     });
   }

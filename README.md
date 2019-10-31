@@ -1,8 +1,9 @@
 # react-native-map-cluster
 
-[cmapper](https://apps.apple.com/jp/app/cmapper/id935586290) or [8xplorer](https://apps.apple.com/app/apple-store/id1460433285?mt=8&l=ja) like smooth map clustering library
+[cmapper](https://apps.apple.com/jp/app/cmapper/id935586290) or [8xplorer](https://apps.apple.com/app/apple-store/id1460433285?mt=8&l=ja) like smooth map clustering library for both iOS and Android. 
 
-![demo](/image/anim.gif)
+![demo](/image/anim.gif) 
+![demo](/image/anim_android.gif)
 
 ## Installation
 
@@ -47,8 +48,10 @@ const Component = withAnimatedCluster({
   // render map 
   public render() {
  
+      const { initialRegion } = this.props;
+      
       // here is the property that the HoC injects.
-      const {animatedMarkers, region, onRegionChanged} = this.props;
+      const {animatedMarkers, onRegionChanged} = this.props;
       
       return (
         <MapView 
@@ -56,7 +59,7 @@ const Component = withAnimatedCluster({
           // recreate cluster when the region changes
           onRegionChangeComplete={onRegionChanged}
           
-          initialRegion={region}
+          initialRegion={initialRegion}
           style={styles.map}>
           
           // render markers 

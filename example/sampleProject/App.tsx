@@ -166,12 +166,13 @@ const Component = withAnimatedCluster({
     }
 
     public render() {
-      const {animatedMarkers, region, onRegionChanged} = this.props;
+      const {initialRegion} = this.props;
+      const {animatedMarkers, onRegionChanged} = this.props;
       return (
         <MapView
           ref={(ref: MapView) => (this.map = ref)}
           onRegionChangeComplete={onRegionChanged}
-          initialRegion={region}
+          initialRegion={initialRegion}
           style={styles.map}>
           {animatedMarkers.map(this.renderMarker)}
         </MapView>
@@ -189,8 +190,8 @@ const App = () => {
           markers={markers}
           initialRegion={{
             ...markers[0].coordinate,
-            latitudeDelta: 0,
-            longitudeDelta: 0,
+            latitudeDelta: 10,
+            longitudeDelta: 10,
           }}
         />
       </SafeAreaView>
