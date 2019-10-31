@@ -118,7 +118,7 @@ const Component = withAnimatedCluster({
       this.renderMarker = this.renderMarker.bind(this);
     }
 
-    public renderMarker(marker: AnimatedMarker, index: number) {
+    public renderMarker(marker: AnimatedMarker & any, index: number) {
       const {clusters, region} = this.props;
 
       const currentCluster = marker.getCluster(clusters);
@@ -133,11 +133,13 @@ const Component = withAnimatedCluster({
       const onPress = () => {
         if (markersInClusterCount) {
           this.map!!.animateToRegion(
-            currentCluster.userExtension.getCenterPosition(),
+            currentCluster!!.userExtension.getCenterPosition(),
           );
         } else {
           this.map!!.animateToRegion({
+            // @ts-ignore
             latitude: marker.coordinate.latitude._value,
+            // @ts-ignore
             longitude: marker.coordinate.longitude._value,
             latitudeDelta: region.latitudeDelta,
             longitudeDelta: region.longitudeDelta,
