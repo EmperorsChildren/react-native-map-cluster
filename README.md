@@ -37,7 +37,7 @@ import Supercluster from 'supercluster';
 
 const {width, height} = Dimensions.get('window');
 const Component = withAnimatedCluster({
-  moveSpeed: 600,
+  moveSpeed: 600, 
   deltaOffset: 1.3,
   width,
   height,
@@ -46,14 +46,22 @@ const Component = withAnimatedCluster({
 
   // render map 
   public render() {
+ 
+      // here is the property that the HoC injects.
       const {animatedMarkers, region, onRegionChanged} = this.props;
+      
       return (
         <MapView 
+        
           // recreate cluster when the region changes
           onRegionChangeComplete={onRegionChanged}
+          
           initialRegion={region}
           style={styles.map}>
+          
+          // render markers 
           {animatedMarkers.map(this.renderMarker)}
+          
         </MapView>
       );
     }
@@ -69,7 +77,10 @@ const App = () => {
       <StatusBar barStyle="dark-content" />
       <SafeAreaView style={{flex: 1}}>
         <Component
+        
+          // {id , coorinates: { latitude, longitude}} is required for each markers
           markers={markers}
+          
           initialRegion={{
             ...markers[0].coordinate,
             latitudeDelta: 0,

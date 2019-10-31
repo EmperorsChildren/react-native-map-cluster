@@ -197,17 +197,17 @@ export const withAnimatedCluster = (options: {
       /**
        * Recreate marker and cluster if the marker changed
        *
-       * @param nextProps
+       * @param prevProps
        */
-      public componentWillReceiveProps(nextProps: T) {
-        const prevLen = this.props.markers.length;
-        const nextLen = nextProps.markers.length;
+      public componentDidUpdate(prevProps: T) {
+        const prevLen = prevProps.markers.length;
+        const nextLen = this.props.markers.length;
         if (nextLen !== prevLen) {
           this.initialize();
           return;
         }
-        const prev = this.props.markers.map((marker: Marker) => marker.id).join('_');
-        const next = nextProps.markers.map((marker: Marker) => marker.id).join('_');
+        const prev = prevProps.markers.map((marker: Marker) => marker.id).join('_');
+        const next = this.props.markers.map((marker: Marker) => marker.id).join('_');
         if (prev !== next) {
           this.initialize();
         }
