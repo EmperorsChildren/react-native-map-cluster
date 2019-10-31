@@ -304,6 +304,7 @@ export const withAnimatedCluster = (options: {
           originalMarkers,
           this.state.animatedMarkers,
           this.state.clusters,
+          // @ts-ignore
           clusters,
         );
 
