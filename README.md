@@ -21,7 +21,12 @@ yarn add react-native-map-cluster
 
 ## Usage
 
-see [Example](/example/sampleProject)
+Complete examples is [Here](/example/sampleProject/App.tsx)
+
+There are only keypoint in this README.
+
+* use `withAnimatedCluster`
+* use `onRegionChanged` for MapView#onRegionChangeComplete
 
 ```
 const {width, height} = Dimensions.get('window');
@@ -32,36 +37,6 @@ const Component = withAnimatedCluster({
   height,
   superClusterProvider: () =>new Supercluster(),
 })(class Map extends React.Component<Props, State> {
-
-  // render markers 
-  public renderMarker(marker: AnimatedMarker & any, index: number) {
-      const {clusters, region} = this.props;
-      
-      // get the cluster which the marker in.
-      const currentCluster = marker.getCluster(clusters);
-      
-      // marker count in same cluster.
-      // marker is not clustered if the currentCluster is undefined.
-      const markersInClusterCount = currentCluster? currentCluster.properties.point_count: 0;
-      
-      return (
-        <MarkerAnimated
-          key={marker.id}
-          coordinate={marker.coordinate}
-          
-          // zoom into pressed cluster
-          onPress={() => markersInClusterCount && this.map.animateToRegion.currentCluster!!.userExtension.getCenterPosition())}>
-          <View style={styles.marker}>
-            {markersInClusterCount ? (
-              <View style={styles.point}>
-                <Text style={styles.pointText}>{markersInClusterCount}</Text>
-              </View>
-            ) : null}
-            <Image source={{uri: marker.image}} style={[styles.markerImage]} />
-          </View>
-        </MarkerAnimated>
-      );
-    }
 
   // render map 
   public render() {
