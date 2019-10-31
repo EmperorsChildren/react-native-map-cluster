@@ -7,10 +7,7 @@ import Supercluster from 'supercluster';
 
 export interface Cluster {
   properties: {
-    item: {
-      latitude: number;
-      longitude: number;
-    };
+    item: Marker;
     cluster_id: any;
     point_count: number;
   };
@@ -25,27 +22,36 @@ export interface Cluster {
   };
 }
 
-export type Marker = {
+interface Marker {
   coordinate: Region;
   id: number | string;
-} & any;
+}
 
-export type AnimatedMarker = {
+type AnyMarker = Marker & any;
+
+export interface AnimatedMarker {
   coordinate: AnimatedRegion;
   id: number | string;
-  getCluster: (clusters: Cluster[]) => Cluster;
-} & any;
+  getCluster: (clusters: Cluster[]) => Cluster | undefined;
+}
 
-type Props = {
-  markers: Marker[];
+export interface InjectedProps {
+  region: Region;
+  clusters: Cluster[];
+  onRegionChanged: (region: Region) => void;
+  animatedMarkers: AnimatedMarker[];
+}
+
+export interface OriginalProps {
+  markers: AnyMarker[];
   initialRegion: Region;
-} & any;
+}
 
-type State = {
+interface State {
   animatedMarkers: AnimatedMarker[];
   clusters: Cluster[];
   region: Region;
-} & any;
+}
 
 /**
  * Create AnimatedMarker with the original value.
@@ -97,17 +103,17 @@ function isSameCluster(currentClusters: Cluster[], nextClusters: Cluster[]): boo
  * @param offset delta offset for the big markers
  */
 function getCenterPosition(cluster: Cluster, width: number, height: number, offset: number = 1.3): Region {
-  const latitudes = cluster.userExtension.markers.map((m) => m.latitude);
-  const longitudes = cluster.userExtension.markers.map((m) => m.longitude);
+  const latitudes = cluster.userExtension.markers.map((m: Marker) => m.coordinate.latitude);
+  const longitudes = cluster.userExtension.markers.map((m: Marker) => m.coordinate.longitude);
   const maxLatitude = Math.max.apply(null, latitudes.map((m) => Math.abs(m)));
   const maxLongitude = Math.max.apply(null, longitudes.map((m) => Math.abs(m)));
   const minLatitude = Math.min.apply(null, latitudes.map((m) => Math.abs(m)));
   const minLongitude = Math.min.apply(null, longitudes.map((m) => Math.abs(m)));
   const _boundingBox: [number, number, number, number] = [
-    longitudes.find((l) => Math.abs(l) === minLongitude),
-    latitudes.find((l) => Math.abs(l) === minLatitude),
-    longitudes.find((l) => Math.abs(l) === maxLongitude),
-    latitudes.find((l) => Math.abs(l) === maxLatitude),
+    longitudes.find((l) => Math.abs(l) === minLongitude)!!,
+    latitudes.find((l) => Math.abs(l) === minLatitude)!!,
+    longitudes.find((l) => Math.abs(l) === maxLongitude)!!,
+    latitudes.find((l) => Math.abs(l) === maxLatitude)!!,
   ];
   const _viewport = GeoViewport.viewport(_boundingBox, [width, height]);
   return {
@@ -166,11 +172,13 @@ export const withAnimatedCluster = (options: {
   superClusterProvider: () => Supercluster;
   moveSpeed: 600;
 }) => {
-  return <T extends Props = Props>(WrappedComponent: React.ComponentType<T>): React.ComponentType<T> => {
+  return <T extends OriginalProps>(
+    WrappedComponent: React.ComponentType<T & InjectedProps>,
+  ): React.ComponentType<T> => {
     return class extends React.Component<T, State> {
       private readonly superCluster: Supercluster;
 
-      constructor(props: Props) {
+      constructor(props: T) {
         super(props);
         this.state = {
           animatedMarkers: [],
@@ -191,7 +199,7 @@ export const withAnimatedCluster = (options: {
        *
        * @param nextProps
        */
-      public componentWillReceiveProps(nextProps: Props) {
+      public componentWillReceiveProps(nextProps: T) {
         const prevLen = this.props.markers.length;
         const nextLen = nextProps.markers.length;
         if (nextLen !== prevLen) {
@@ -239,6 +247,7 @@ export const withAnimatedCluster = (options: {
               item: marker,
             },
           }));
+          // @ts-ignore
           this.superCluster.load(defaultClusters);
 
           this.onRegionChanged(this.state.region);
@@ -263,19 +272,16 @@ export const withAnimatedCluster = (options: {
           region.longitudeDelta >= 40
             ? { zoom: 1 }
             : GeoViewport.viewport(boundingBox, [options.width, options.height]);
-        const clusters = this.superCluster.getClusters(boundingBox, viewport.zoom);
+
+        // @ts-ignore
+        const clusters = this.superCluster.getClusters(boundingBox, viewport.zoom) as Cluster[];
 
         const originalMarkers = this.props.markers;
-        // @ts-ignore
         clusters.forEach((cluster: Cluster) => {
           if (cluster.properties.point_count === 0) {
-            const marker = originalMarkers.find(
-              (m: Marker) =>
-                m.coordinate.latitude === cluster.properties.item.latitude &&
-                m.coordinate.longitude === cluster.properties.item.longitude,
-            );
+            const marker = originalMarkers.find((m: Marker) => m.id === cluster.properties.item.id);
             cluster.userExtension = {
-              coordinate: cluster.properties.item,
+              coordinate: cluster.properties.item.coordinate,
               markers: marker ? [marker] : [],
               getCenterPosition: () => getCenterPosition(cluster, options.width, options.height, options.deltaOffset),
             };
@@ -298,7 +304,6 @@ export const withAnimatedCluster = (options: {
           }
         });
 
-        // @ts-ignore
         animateMarkersIfNeeded(
           options.moveSpeed,
           originalMarkers,
@@ -319,10 +324,8 @@ export const withAnimatedCluster = (options: {
        */
       private addMarkersToTopCluster(originalMarkers: Marker[], cluster: Cluster, markers: Marker[]) {
         if (cluster.properties.point_count === 0) {
-          const latLong = cluster.properties.item;
-          const marker = originalMarkers.find(
-            (m: Marker) => m.latitude === latLong.latitude && m.longitude === latLong.longitude,
-          );
+          const id = cluster.properties.item.id;
+          const marker = originalMarkers.find((m: Marker) => m.id === id);
           if (marker) {
             markers.push(marker);
           }
