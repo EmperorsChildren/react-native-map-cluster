@@ -2,7 +2,10 @@
 
 [cmapper](https://apps.apple.com/jp/app/cmapper/id935586290) or [8xplorer](https://apps.apple.com/app/apple-store/id1460433285?mt=8&l=ja) like smooth map clustering library for both iOS and Android. 
 
+iOS  
 ![demo](/image/anim.gif) 
+
+Android   
 ![demo](/image/anim_android.gif)
 
 ## Installation
