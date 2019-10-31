@@ -21,8 +21,8 @@ export interface Cluster {
       longitude: number;
     };
     markers: Marker[];
+    getCenterPosition: () => Region;
   };
-  getCenterPosition: () => Region;
 }
 
 export type Marker = {
@@ -34,6 +34,17 @@ export type AnimatedMarker = {
   coordinate: AnimatedRegion;
   id: number | string;
   getCluster: (clusters: Cluster[]) => Cluster;
+} & any;
+
+type Props = {
+  markers: Marker[];
+  initialRegion: Region;
+} & any;
+
+type State = {
+  animatedMarkers: AnimatedMarker[];
+  clusters: Cluster[];
+  region: Region;
 } & any;
 
 /**
@@ -81,10 +92,11 @@ function isSameCluster(currentClusters: Cluster[], nextClusters: Cluster[]): boo
 /**
  * Get the center position of cluster
  * @param cluster
- * @param width
- * @param height
+ * @param width dimension width
+ * @param height dimension height
+ * @param offset delta offset for the big markers
  */
-function getCenterPosition(cluster: Cluster, width: number, height: number): Region {
+function getCenterPosition(cluster: Cluster, width: number, height: number, offset: number = 1.3): Region {
   const latitudes = cluster.userExtension.markers.map((m) => m.latitude);
   const longitudes = cluster.userExtension.markers.map((m) => m.longitude);
   const maxLatitude = Math.max.apply(null, latitudes.map((m) => Math.abs(m)));
@@ -101,27 +113,58 @@ function getCenterPosition(cluster: Cluster, width: number, height: number): Reg
   return {
     latitude: _viewport.center[1],
     longitude: _viewport.center[0],
-    longitudeDelta: maxLongitude - minLongitude || 0.1,
-    latitudeDelta: maxLatitude - minLatitude || 0.1,
+    longitudeDelta: (maxLongitude - minLongitude) * offset || 0.1,
+    latitudeDelta: (maxLatitude - minLatitude) * offset || 0.1,
   };
 }
 
-type Props = {
-  markers: Marker[];
-  initialRegion: Region;
-} & any;
-
-type State = {
-  animatedMarkers: AnimatedMarker[];
-  clusters: Cluster[];
-  region: Region;
-} & any;
+/**
+ * Animate marker if the clusters changes
+ * @param duration
+ * @param originalMarkers
+ * @param animatedMarkers
+ * @param currentClusters
+ * @param nextClusters
+ */
+function animateMarkersIfNeeded(
+  duration: number,
+  originalMarkers: Marker[],
+  animatedMarkers: AnimatedMarker[],
+  currentClusters: Cluster[],
+  nextClusters: Cluster[],
+) {
+  if (!isSameCluster(currentClusters, nextClusters)) {
+    // release from cluster or move into cluster
+    originalMarkers.forEach((marker: Marker, index: number) => {
+      const stayCluster = nextClusters.find((cluster: Cluster) =>
+        cluster.userExtension.markers.find((m) => m.id === marker.id),
+      );
+      if (stayCluster) {
+        // Clustering
+        const animation = animatedMarkers[index].coordinate.timing({
+          ...stayCluster.userExtension.coordinate,
+          duration,
+        });
+        animation.start();
+      } else {
+        // Release
+        const animation = animatedMarkers[index].coordinate.timing({
+          latitude: marker.coordinate.latitude,
+          longitude: marker.coordinate.longitude,
+          duration,
+        });
+        animation.start();
+      }
+    });
+  }
+}
 
 export const withAnimatedCluster = (options: {
   width: number;
   height: number;
+  deltaOffset: 1.3;
   superClusterProvider: () => Supercluster;
-  moveSpeed: number;
+  moveSpeed: 600;
 }) => {
   return <T extends Props = Props>(WrappedComponent: React.ComponentType<T>): React.ComponentType<T> => {
     return class extends React.Component<T, State> {
@@ -183,22 +226,23 @@ export const withAnimatedCluster = (options: {
        */
       private initialize() {
         const animatedMarkers = createAnimatedMarkers(this.props.markers);
-        this.setState({ animatedMarkers });
 
-        const defaultClusters = this.props.markers.map((marker: Marker) => ({
-          type: 'Feature',
-          geometry: {
-            type: 'Point',
-            coordinates: [marker.coordinate.longitude, marker.coordinate.latitude],
-          },
-          properties: {
-            point_count: 0,
-            item: marker,
-          },
-        }));
-        this.superCluster.load(defaultClusters);
+        this.setState({ animatedMarkers }, () => {
+          const defaultClusters = this.props.markers.map((marker: Marker) => ({
+            type: 'Feature',
+            geometry: {
+              type: 'Point',
+              coordinates: [marker.coordinate.longitude, marker.coordinate.latitude],
+            },
+            properties: {
+              point_count: 0,
+              item: marker,
+            },
+          }));
+          this.superCluster.load(defaultClusters);
 
-        this.onRegionChanged(this.state.region);
+          this.onRegionChanged(this.state.region);
+        });
       }
 
       /**
@@ -221,85 +265,61 @@ export const withAnimatedCluster = (options: {
             : GeoViewport.viewport(boundingBox, [options.width, options.height]);
         const clusters = this.superCluster.getClusters(boundingBox, viewport.zoom);
 
+        const originalMarkers = this.props.markers;
         // @ts-ignore
         clusters.forEach((cluster: Cluster) => {
           if (cluster.properties.point_count === 0) {
-            const marker = this.props.markers.find(
+            const marker = originalMarkers.find(
               (m: Marker) =>
                 m.coordinate.latitude === cluster.properties.item.latitude &&
                 m.coordinate.longitude === cluster.properties.item.longitude,
             );
-
             cluster.userExtension = {
               coordinate: cluster.properties.item,
               markers: marker ? [marker] : [],
+              getCenterPosition: () => getCenterPosition(cluster, options.width, options.height, options.deltaOffset),
             };
           } else {
+            const markers: Marker[] = [];
+            // add markers of child clusters
+            // @ts-ignore
+            this.superCluster.getChildren(cluster.properties.cluster_id).forEach((child: Cluster) => {
+              this.addMarkersToTopCluster(originalMarkers, child, markers);
+            });
+
             cluster.userExtension = {
               coordinate: {
                 latitude: cluster.geometry.coordinates[1],
                 longitude: cluster.geometry.coordinates[0],
               },
-              markers: [],
+              markers,
+              getCenterPosition: () => getCenterPosition(cluster, options.width, options.height, options.deltaOffset),
             };
-            // add markers of child clusters
-            // @ts-ignore
-            this.superCluster.getChildren(cluster.properties.cluster_id).forEach((child: Cluster) => {
-              this.addMarkersToTopCluster(child, cluster.userExtension.markers);
-            });
           }
-
-          cluster.getCenterPosition = () => getCenterPosition(cluster, options.width, options.height);
         });
 
         // @ts-ignore
-        this.animateMarkersIfNeeded(clusters);
+        animateMarkersIfNeeded(
+          options.moveSpeed,
+          originalMarkers,
+          this.state.animatedMarkers,
+          this.state.clusters,
+          clusters,
+        );
 
         this.setState({ region, clusters });
       }
 
       /**
-       * Animate markers when the cluster changes.
-       * @param nextClusters
-       */
-      private animateMarkersIfNeeded(nextClusters: Cluster[]) {
-        const duration = options.moveSpeed;
-
-        if (!isSameCluster(this.state.clusters, nextClusters)) {
-          // release from cluster or move into cluster
-          this.state.animatedMarkers.forEach((marker: Marker, index: number) => {
-            const stayCluster = nextClusters.find((cluster: Cluster) =>
-              cluster.userExtension.markers.find((m) => m.id === marker.id),
-            );
-            if (stayCluster) {
-              // Clustering
-              const animation = this.state.animatedMarkers[index].coordinate.timing({
-                ...stayCluster.userExtension.coordinate,
-                duration,
-              });
-              animation.start();
-            } else {
-              // Release
-              const animation = this.state.animatedMarkers[index].coordinate.timing({
-                latitude: marker.coordinate.latitude,
-                longitude: marker.coordinate.longitude,
-                duration,
-              });
-              animation.start();
-            }
-          });
-        }
-      }
-
-      /**
        * Add the markers to the top level cluster.
+       * @param originalMarkers
        * @param cluster
        * @param markers
        */
-      private addMarkersToTopCluster(cluster: Cluster, markers: Marker[]) {
+      private addMarkersToTopCluster(originalMarkers: Marker[], cluster: Cluster, markers: Marker[]) {
         if (cluster.properties.point_count === 0) {
           const latLong = cluster.properties.item;
-          const marker = this.props.markers.find(
+          const marker = originalMarkers.find(
             (m: Marker) => m.latitude === latLong.latitude && m.longitude === latLong.longitude,
           );
           if (marker) {
@@ -308,7 +328,7 @@ export const withAnimatedCluster = (options: {
         } else {
           // @ts-ignore
           this.superCluster.getChildren(cluster.properties.cluster_id).forEach((child: Cluster) => {
-            this.addMarkersToTopCluster(child, markers);
+            this.addMarkersToTopCluster(originalMarkers, child, markers);
           });
         }
       }

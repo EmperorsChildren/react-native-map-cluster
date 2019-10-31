@@ -62,7 +62,7 @@
     "prettier": "^1.15.2",
     "quicktype": "^15.0.167",
     "raw-loader": "^0.5.1",
-    "react": "16.11.0",
+    "react": "*",
     "react-native": "*",
     "react-native-maps": "*",
     "rimraf": "^2.6.3",
@@ -84,10 +84,10 @@
     "worker-loader": "^2.0.0"
   },
   "peerDependencies": {
-    "@mapbox/geo-viewport": "^0.4.0",
-    "react": "16.11.0",
+    "react": "*",
     "react-native": "*",
     "react-native-maps": "*",
+    "@mapbox/geo-viewport": "^0.4.0",
     "supercluster": "^6.0.2"
   }
 }
