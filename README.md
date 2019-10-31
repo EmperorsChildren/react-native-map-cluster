@@ -29,6 +29,12 @@ There are only keypoint in this README.
 * use `onRegionChanged` for MapView#onRegionChangeComplete
 
 ```
+import React, {Fragment} from 'react';
+import {Dimensions,Image,SafeAreaView,StatusBar,StyleSheet,Text,View } from 'react-native';
+import { AnimatedMarker, withAnimatedCluster } from 'react-native-map-cluster';
+import MapView, {MarkerAnimated} from 'react-native-maps';
+import Supercluster from 'supercluster';
+
 const {width, height} = Dimensions.get('window');
 const Component = withAnimatedCluster({
   moveSpeed: 600,
@@ -54,4 +60,25 @@ const Component = withAnimatedCluster({
 } 
 ```
 
+* `markers` and `initialRegion` is required props
+
+```
+const App = () => {
+  return (
+    <Fragment>
+      <StatusBar barStyle="dark-content" />
+      <SafeAreaView style={{flex: 1}}>
+        <Component
+          markers={markers}
+          initialRegion={{
+            ...markers[0].coordinate,
+            latitudeDelta: 0,
+            longitudeDelta: 0,
+          }}
+        />
+      </SafeAreaView>
+    </Fragment>
+  );
+};
+```
 
