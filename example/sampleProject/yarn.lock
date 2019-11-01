@@ -1045,7 +1045,7 @@
 
 "@yoshidan/react-native-map-cluster@https://github.com/yoshidan/react-native-map-cluster":
   version "0.0.1"
-  resolved "https://github.com/yoshidan/react-native-map-cluster#255a126e580525a9c4c62035a975b78aac1d0f85"
+  resolved "https://github.com/yoshidan/react-native-map-cluster#dc35216990384fe6b2c3a4bcdd370dd1899d019f"
 
 abab@^2.0.0:
   version "2.0.2"
