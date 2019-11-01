@@ -25,7 +25,7 @@ yarn add react-native-map-cluster
 
 ## Usage
 
-Complete examples is [Here](/example/sampleProject/App.tsx)
+Complete examples is [Here](/example/sampleProject)
 
 There are only keypoint in this README.
 
@@ -74,7 +74,7 @@ const Component = withAnimatedCluster({
 } 
 ```
 
-* `markers` and `initialRegion` is required props
+* Use wrapped component with required props `markers` and `initialRegion` 
 
 ```
 const App = () => {
@@ -99,3 +99,82 @@ const App = () => {
 };
 ```
 
+## Props
+
+### withAnimatedCluster
+
+#### Arguments
+
+| Name| Type | Default | Note |
+|-------|-------|-------|-----|
+| moveSpeed | number | 600 | the animating speed of split or synthesize cluster | 
+| deltaOffset | number | 1.3 | the value to suppress marker spreading to the outside of the window when splitting cluster. Set smaller value if the icon is small or bigger value if the icon is big.
+| width | number | null | dimension width of map |
+| height | number | null | dimension height of map |
+| superClusterProvider | () => Supercluster | null | the function to create the Supercluster |
+
+#### Required props to use wrapped component
+
+| Name| Type | Note |
+|-------|-------|-------|
+| markers | Marker[] | Markers to display on the MapView |
+| initialRegion | Region | initial region of MapView |
+
+```
+type Marker = {
+  coordinate: Region;
+  id: number | string
+}
+```
+
+#### Injected props
+
+| Name| Type | Note |
+|-------|-------|-------|
+| animatedMarkers | AnimatedMarkers[] | Converted to markers to animate. render this markers |
+| region | Region | Current region |
+| clusters | Cluster[] | Current clusters |
+| onRegionChanged | (region:Region) => void | function to cluster markers with current region. Set as MapView#onRegionChangeCompleted |
+
+```
+type AnimatedMarkers = {
+  coordinate: AnimatedRegion;
+  id: number | string;
+  getCluster: (clusters: Cluster[]) => Cluster | undefined;
+}
+```
+
+```
+type Clusters = {  
+  properties: {
+      point_count: number // count of markers in this cluster 
+  },  
+  userExtension: {
+    getCenterPosition: () => Region;
+  }
+}
+```
+
+`getCenterPosition` is required for splitting cluster on marker pressed
+
+```
+renderMarker(marker: AnimatedMarker) {
+
+    const {clusters, region} = this.props;
+
+    const currentCluster = marker.getCluster(clusters);
+    const markersInClusterCount = currentCluster ? currentCluster.properties.point_count : 0;
+      
+    return (
+       <MarkerAnimated
+         key={marker.id}
+         coordinate={marker.coordinate}
+          
+         // split clster when markers is pressed.
+         onPress={() => markersInClusterCount && this.map.animateToRegion(currentCluster.userExtension.getCenterPosition()}>
+         <...>
+       </MarkerAnimated>
+    );
+}
+
+```
