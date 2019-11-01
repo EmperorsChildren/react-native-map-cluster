@@ -3,15 +3,15 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "postinstall": "mkdir -p node_modules/react-native-map-cluster/lib && cp ../../lib/* node_modules/react-native-map-cluster/lib/ && cp ../../package.json node_modules/react-native-map-cluster/",
     "android": "react-native run-android",
     "ios": "react-native run-ios"
   },
   "dependencies": {
+    "@mapbox/geo-viewport": "^0.4.0",
+    "@yoshidan/react-native-map-cluster": "https://github.com/yoshidan/react-native-map-cluster",
     "react": "16.8.6",
     "react-native": "0.60.5",
     "react-native-maps": "^0.26.1",
-    "@mapbox/geo-viewport": "^0.4.0",
     "supercluster": "^6.0.2"
   },
   "devDependencies": {

@@ -20,7 +20,7 @@ yarn add @mapbox/geo-viewport
 2. install library
 
 ```
-yarn add react-native-map-cluster
+yarn add https://github.com/yoshidan/react-native-map-cluster
 ```
 
 ## Usage
@@ -35,7 +35,7 @@ There are only keypoint in this README.
 ```
 import React, {Fragment} from 'react';
 import {Dimensions,Image,SafeAreaView,StatusBar,StyleSheet,Text,View } from 'react-native';
-import { AnimatedMarker, withAnimatedCluster } from 'react-native-map-cluster';
+import { AnimatedMarker, withAnimatedCluster } from '@yoshidan/react-native-map-cluster';
 import MapView, {MarkerAnimated} from 'react-native-maps';
 import Supercluster from 'supercluster';
 

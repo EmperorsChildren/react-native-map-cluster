@@ -24,7 +24,7 @@ import {
   InjectedProps,
   OriginalProps,
   withAnimatedCluster,
-} from 'react-native-map-cluster';
+} from '@yoshidan/react-native-map-cluster';
 import MapView, {MarkerAnimated} from 'react-native-maps';
 import Supercluster from 'supercluster';
 
