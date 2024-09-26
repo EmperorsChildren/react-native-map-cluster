@@ -149,7 +149,7 @@ function animateMarkersIfNeeded(
       const coordinate = stayCluster ? stayCluster.userExtension.coordinate : marker.coordinate;
       if (Platform.OS === 'android') {
         // @ts-ignore
-        animatedMarkers[index].coordinate._component.animateMarkerToCoordinate(coordinate, duration);
+        animatedMarkers[index].coordinate.animateMarkerToCoordinate(coordinate, duration);
       } else {
         animatedMarkers[index].coordinate
           .timing({
