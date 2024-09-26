@@ -15,7 +15,7 @@
     "url": "https://github.com/emperorschildren/react-native-map-cluster.git"
   },
   "scripts": {
-    "version": "yarn all",
+    "build-all": "NODE_OPTIONS=--openssl-legacy-provider yarn all",
     "all": "yarn clean && yarn build",
     "clean": "rimraf dist types",
     "build": "yarn build-dev && yarn build-prod && yarn build-types",
