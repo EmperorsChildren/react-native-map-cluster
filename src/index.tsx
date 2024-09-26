@@ -147,17 +147,12 @@ function animateMarkersIfNeeded(
         cluster.userExtension.markers.find((m) => m.id === marker.id),
       );
       const coordinate = stayCluster ? stayCluster.userExtension.coordinate : marker.coordinate;
-      if (Platform.OS === 'android') {
-        // @ts-ignore
-        animatedMarkers[index].coordinate.animateMarkerToCoordinate(coordinate, duration);
-      } else {
-        animatedMarkers[index].coordinate
-          .timing({
-            ...coordinate,
-            duration,
-          })
-          .start();
-      }
+      animatedMarkers[index].coordinate
+        .timing({
+          ...coordinate,
+          duration,
+        })
+        .start();
     });
   }
 }
