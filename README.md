@@ -20,7 +20,7 @@ yarn add @mapbox/geo-viewport
 2. install library
 
 ```
-yarn add https://github.com/yoshidan/react-native-map-cluster
+ yarn add @emperorschildren/react-native-map-cluster@https://github.com/EmperorsChildren/react-native-map-cluster
 ```
 
 ## Usage
