@@ -26,7 +26,6 @@ interface Marker {
   coordinate: Region;
   id: number | string;
 }
-
 type AnyMarker = Marker & any;
 
 export interface AnimatedMarker {
@@ -146,6 +145,7 @@ function animateMarkersIfNeeded(
         cluster.userExtension.markers.find((m) => m.id === marker.id),
       );
       const coordinate = stayCluster ? stayCluster.userExtension.coordinate : marker.coordinate;
+      //@ts-ignore
       animatedMarkers[index].coordinate.timing({ ...coordinate, duration }).start();
     });
   }

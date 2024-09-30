@@ -21,7 +21,7 @@ interface Marker {
     coordinate: Region;
     id: number | string;
 }
-declare type AnyMarker = Marker & any;
+type AnyMarker = Marker & any;
 export interface AnimatedMarker {
     coordinate: AnimatedRegion;
     id: number | string;
@@ -41,7 +41,7 @@ export declare const withAnimatedCluster: (options: {
     width: number;
     height: number;
     deltaOffset: 1.3;
-    superClusterProvider: () => Supercluster<Supercluster.AnyProps, Supercluster.AnyProps>;
+    superClusterProvider: () => Supercluster;
     moveSpeed: 600;
 }) => <T extends OriginalProps>(WrappedComponent: React.ComponentType<T & InjectedProps>) => React.ComponentType<T>;
 export {};
