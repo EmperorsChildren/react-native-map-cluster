@@ -1,6 +1,5 @@
 import GeoViewport from '@placemarkio/geo-viewport'
 import * as React from 'react'
-import { Platform } from 'react-native'
 import { AnimatedRegion, Region } from 'react-native-maps'
 import Supercluster from 'supercluster'
 
@@ -179,16 +178,10 @@ function animateMarkersIfNeeded(
       const coordinate = stayCluster
         ? stayCluster.userExtension.coordinate
         : marker.coordinate
-      if (Platform.OS === 'android') {
-        animatedMarkers[index].coordinate._component.animateMarkerToCoordinate(
-          coordinate,
-          duration,
-        )
-      } else {
-        animatedMarkers[index].coordinate // @ts-ignore
-          .timing({ ...coordinate, duration })
-          .start()
-      }
+
+      animatedMarkers[index].coordinate // @ts-ignore
+        .timing({ ...coordinate, duration })
+        .start()
     })
   }
 }

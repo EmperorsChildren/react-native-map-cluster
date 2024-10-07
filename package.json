@@ -1,6 +1,6 @@
 {
   "name": "@emperorschildren/react-native-map-cluster",
-  "version": "0.0.1-alpha.2",
+  "version": "0.0.1",
   "description": "Map clustering library.",
   "repository": {
     "type": "git",
