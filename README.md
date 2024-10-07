@@ -13,13 +13,13 @@ Android
 1. install dependency
 
 ```
-yarn add @placemarkio/geo-viewport supercluster @types/supercluster react-native-maps
+yarn add supercluster @types/supercluster @placemarkio/geo-viewport react-native-maps
 ```
 
 2. install library
 
 ```
- yarn add @emperorschildren/react-native-map-cluster@https://github.com/EmperorsChildren/react-native-map-cluster
+ yarn add @emperorschildren/react-native-map-cluster
 ```
 
 ## Usage
@@ -117,9 +117,9 @@ const App = () => {
 | markers       | Marker[] | Markers to display on the MapView |
 | initialRegion | Region   | initial region of MapView         |
 
-```
+```ts
 type Marker = {
-  coordinate: Region;
+  coordinate: Region
   id: number | string
 }
 ```
@@ -135,21 +135,21 @@ type Marker = {
 
 ```ts
 type AnimatedMarkers = {
-  coordinate: AnimatedRegion;
-  id: number | string;
-  getCluster: (clusters: Cluster[]) => Cluster | undefined;
-};
+  coordinate: AnimatedRegion
+  id: number | string
+  getCluster: (clusters: Cluster[]) => Cluster | undefined
+}
 ```
 
 ```ts
 type Clusters = {
   properties: {
-    point_count: number; // count of markers in this cluster
-  };
+    point_count: number // count of markers in this cluster
+  }
   userExtension: {
-    getCenterPosition: () => Region;
-  };
-};
+    getCenterPosition: () => Region
+  }
+}
 ```
 
 `getCenterPosition` is required for splitting cluster on marker pressed
