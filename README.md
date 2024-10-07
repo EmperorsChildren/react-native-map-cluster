@@ -13,7 +13,7 @@ Android
 1. install dependency
 
 ```
-yarn add react-native-maps supercluster @placemarkio/geo-viewport
+yarn add @placemarkio/geo-viewport supercluster @types/supercluster react-native-maps
 ```
 
 2. install library
