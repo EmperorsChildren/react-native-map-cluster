@@ -31,7 +31,7 @@ There are only keypoint in this README.
 - use `withAnimatedCluster`
 - use `onRegionChanged` for MapView#onRegionChangeComplete
 
-```
+```ts
 import React, {Fragment} from 'react';
 import {Dimensions,Image,SafeAreaView,StatusBar,StyleSheet,Text,View } from 'react-native';
 import { AnimatedMarker, withAnimatedCluster } from '@emperorschildren/react-native-map-cluster';
@@ -75,17 +75,15 @@ const Component = withAnimatedCluster({
 
 - Use wrapped component with required props `markers` and `initialRegion`
 
-```
+```ts
 const App = () => {
   return (
     <Fragment>
       <StatusBar barStyle="dark-content" />
-      <SafeAreaView style={{flex: 1}}>
+      <SafeAreaView style={{ flex: 1 }}>
         <Component
-
           // {id , coorinates: { latitude, longitude}} is required for each markers
           markers={markers}
-
           initialRegion={{
             ...markers[0].coordinate,
             latitudeDelta: 0,
@@ -135,28 +133,28 @@ type Marker = {
 | clusters        | Cluster[]               | Current clusters                                                                        |
 | onRegionChanged | (region:Region) => void | function to cluster markers with current region. Set as MapView#onRegionChangeCompleted |
 
-```
+```ts
 type AnimatedMarkers = {
   coordinate: AnimatedRegion;
   id: number | string;
   getCluster: (clusters: Cluster[]) => Cluster | undefined;
-}
+};
 ```
 
-```
+```ts
 type Clusters = {
   properties: {
-      point_count: number // count of markers in this cluster
-  },
+    point_count: number; // count of markers in this cluster
+  };
   userExtension: {
     getCenterPosition: () => Region;
-  }
-}
+  };
+};
 ```
 
 `getCenterPosition` is required for splitting cluster on marker pressed
 
-```
+```ts
 renderMarker(marker: AnimatedMarker) {
 
     const {clusters, region} = this.props;
