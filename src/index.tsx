@@ -104,10 +104,22 @@ function isSameCluster(currentClusters: Cluster[], nextClusters: Cluster[]): boo
 function getCenterPosition(cluster: Cluster, width: number, height: number, offset: number = 1.3): Region {
   const latitudes = cluster.userExtension.markers.map((m: Marker) => m.coordinate.latitude);
   const longitudes = cluster.userExtension.markers.map((m: Marker) => m.coordinate.longitude);
-  const maxLatitude = Math.max.apply(null, latitudes.map((m) => Math.abs(m)));
-  const maxLongitude = Math.max.apply(null, longitudes.map((m) => Math.abs(m)));
-  const minLatitude = Math.min.apply(null, latitudes.map((m) => Math.abs(m)));
-  const minLongitude = Math.min.apply(null, longitudes.map((m) => Math.abs(m)));
+  const maxLatitude = Math.max.apply(
+    null,
+    latitudes.map((m) => Math.abs(m)),
+  );
+  const maxLongitude = Math.max.apply(
+    null,
+    longitudes.map((m) => Math.abs(m)),
+  );
+  const minLatitude = Math.min.apply(
+    null,
+    latitudes.map((m) => Math.abs(m)),
+  );
+  const minLongitude = Math.min.apply(
+    null,
+    longitudes.map((m) => Math.abs(m)),
+  );
   const _boundingBox: [number, number, number, number] = [
     longitudes.find((l) => Math.abs(l) === minLongitude)!!,
     latitudes.find((l) => Math.abs(l) === minLatitude)!!,
