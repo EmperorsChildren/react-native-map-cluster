@@ -63,7 +63,7 @@ buck-out/
 /ios/Pods/
 
 # Library
-lib/
+# lib/
 
 # yarn
 .pnp.*
