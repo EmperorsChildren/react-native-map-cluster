@@ -1009,7 +1009,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@emperorschildren/react-native-map-cluster@workspace:."
   dependencies:
-    "@mapbox/geo-viewport": "npm:^0.5.0"
+    "@placemarkio/geo-viewport": "npm:^1.0.2"
     "@types/react": "npm:^18.2.6"
     "@types/supercluster": "npm:^7.1.3"
     husky: "npm:^9.1.6"
@@ -1029,7 +1029,7 @@ __metadata:
     webpack: "npm:^5.95.0"
     webpack-cli: "npm:^5.1.4"
   peerDependencies:
-    "@mapbox/geo-viewport": ^0.5.0
+    "@placemarkio/geo-viewport": ^1.0.2
     react: "*"
     react-native: "*"
     react-native-maps: "*"
@@ -1197,27 +1197,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mapbox/geo-viewport@npm:^0.5.0":
-  version: 0.5.0
-  resolution: "@mapbox/geo-viewport@npm:0.5.0"
-  dependencies:
-    "@mapbox/sphericalmercator": "npm:^1.2.0"
-  checksum: 10c0/bd79ebc82b8e1a79a35b6e3ec397e24ffb32d04be346628f2f3d3beebe68839005519c1aa46b7f87bd0629d2f61d21417a17fd6507be485a953455a0d9004bfc
-  languageName: node
-  linkType: hard
-
-"@mapbox/sphericalmercator@npm:^1.2.0":
-  version: 1.2.0
-  resolution: "@mapbox/sphericalmercator@npm:1.2.0"
-  bin:
-    bbox: bin/bbox.js
-    to4326: bin/to4326.js
-    to900913: bin/to900913.js
-    xyz: bin/xyz.js
-  checksum: 10c0/bb4b43fa1dbd4bd3f44dc476a51dc6c2d776c1b7eedb683afa8b5ff1f37cc3ec4f6b069e9c180c8bbfa9c844358483f5dc574fa87d203c2b4ad01a673461908e
-  languageName: node
-  linkType: hard
-
 "@nodelib/fs.scandir@npm:2.1.5":
   version: 2.1.5
   resolution: "@nodelib/fs.scandir@npm:2.1.5"
@@ -1271,6 +1250,13 @@ __metadata:
   version: 0.11.0
   resolution: "@pkgjs/parseargs@npm:0.11.0"
   checksum: 10c0/5bd7576bb1b38a47a7fc7b51ac9f38748e772beebc56200450c4a817d712232b8f1d3ef70532c80840243c657d491cf6a6be1e3a214cff907645819fdc34aadd
+  languageName: node
+  linkType: hard
+
+"@placemarkio/geo-viewport@npm:^1.0.2":
+  version: 1.0.2
+  resolution: "@placemarkio/geo-viewport@npm:1.0.2"
+  checksum: 10c0/b1e3ad93def678a6e1b303e827aa8d6aa0f75d413353ce07d43a16a4caf1e9aa4e39441de6bc06e6c8f80d8afbc78e537dd74cdb102a9b970d1cdfd9ac27eb9a
   languageName: node
   linkType: hard
 

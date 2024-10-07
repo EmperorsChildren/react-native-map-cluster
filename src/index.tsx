@@ -1,7 +1,6 @@
 import * as React from 'react';
 
-// @ts-ignore
-import * as GeoViewport from '@mapbox/geo-viewport';
+import GeoViewport from '@placemarkio/geo-viewport';
 import { AnimatedRegion, Region } from 'react-native-maps';
 import Supercluster from 'supercluster';
 
