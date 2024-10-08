@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 import { AnimatedRegion, Region } from 'react-native-maps';
 import Supercluster from 'supercluster';
 export interface Cluster {
@@ -43,5 +43,18 @@ export declare const withAnimatedCluster: (options: {
     deltaOffset: 1.3;
     superClusterProvider: () => Supercluster;
     moveSpeed: 600;
-}) => <T extends OriginalProps>(WrappedComponent: React.ComponentType<T & InjectedProps>) => React.ComponentType<T>;
+}) => <T_1 extends OriginalProps>(WrappedComponent: React.ComponentType<T_1 & InjectedProps>) => React.ComponentType<T_1>;
+interface T extends OriginalProps {
+}
+export declare function AnimatedClusterFunc({ options, WrappedComponent, props, }: {
+    options: {
+        width: number;
+        height: number;
+        deltaOffset: 1.3;
+        superClusterProvider: () => Supercluster;
+        moveSpeed: 600;
+    };
+    WrappedComponent: React.ComponentType<T & InjectedProps>;
+    props: T;
+}): React.JSX.Element;
 export {};
