@@ -1,5 +1,5 @@
 import GeoViewport from '@placemarkio/geo-viewport'
-import * as React from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { AnimatedRegion, Region } from 'react-native-maps'
 import Supercluster from 'supercluster'
 
@@ -393,4 +393,203 @@ export const withAnimatedCluster = (options: {
       }
     }
   }
+}
+
+interface T extends OriginalProps {}
+
+export const withAnimatedClusterFunc = (
+  options: {
+    width: number
+    height: number
+    deltaOffset: 1.3
+    superClusterProvider: () => Supercluster
+    moveSpeed: 600
+  },
+  WrappedComponent: React.ComponentType<T & InjectedProps>,
+  props: T,
+) => {
+  const prevMarkers = useRef(props.markers)
+
+  const [animatedMarkers, setAnimatedMarkers] = useState<Array<AnimatedMarker>>(
+    [],
+  )
+  const [clusters, setClusters] = useState<Array<Cluster>>([])
+  const [region, setRegion] = useState<Region>(props.initialRegion)
+
+  const superCluster: Supercluster = options.superClusterProvider()
+
+  useEffect(() => {
+    initialize()
+  }, [])
+
+  /**
+   * Recreate marker and cluster if the marker changed
+   */
+  useEffect(() => {
+    const prevLen = prevMarkers.current.length
+    const nextLen = props.markers.length
+    if (nextLen !== prevLen) {
+      initialize()
+      return
+    }
+    const prev = prevMarkers.current
+      .map((marker: Marker) => marker.id)
+      .join('_')
+    const next = props.markers.map((marker: Marker) => marker.id).join('_')
+    if (prev !== next) {
+      initialize()
+    }
+  })
+
+  useEffect(() => {
+    const defaultClusters = props.markers.map((marker: Marker) => ({
+      type: 'Feature',
+      geometry: {
+        type: 'Point',
+        coordinates: [marker.coordinate.longitude, marker.coordinate.latitude],
+      },
+      properties: {
+        point_count: 0,
+        item: marker,
+      },
+    }))
+
+    // @ts-ignore
+    superCluster.load(defaultClusters)
+
+    onRegionChanged(region)
+  }, [animatedMarkers])
+
+  /**
+   * Create the clusters and animated markers.
+   * Trigger when the marker changes.
+   */
+  function initialize() {
+    const bruh = createAnimatedMarkers(props.markers)
+    setAnimatedMarkers(bruh)
+    prevMarkers.current = props.markers
+  }
+
+  /**
+   * Recreate the cluster by new Region.
+   * Call on onRegionChangeCompleted
+   *
+   * @param region currentRegion
+   */
+  function onRegionChanged(region: Region) {
+    const delta =
+      region.longitudeDelta < 0
+        ? region.latitudeDelta + 360
+        : region.longitudeDelta
+    const boundingBox: [number, number, number, number] = [
+      region.longitude - delta,
+      region.latitude - region.latitudeDelta,
+      region.longitude + delta,
+      region.latitude + region.latitudeDelta,
+    ]
+    const viewport =
+      region.longitudeDelta >= 40
+        ? { zoom: 1 }
+        : GeoViewport.viewport(boundingBox, [options.width, options.height])
+
+    // @ts-ignore
+    const nextClusters = superCluster.getClusters(
+      boundingBox,
+      viewport.zoom,
+    ) as Cluster[]
+
+    const originalMarkers = props.markers
+    clusters.forEach((cluster: Cluster) => {
+      if (cluster.properties.point_count === 0) {
+        const marker = originalMarkers.find(
+          (m: Marker) => m.id === cluster.properties.item.id,
+        )
+        cluster.userExtension = {
+          coordinate: cluster.properties.item.coordinate,
+          markers: marker ? [marker] : [],
+          getCenterPosition: () =>
+            getCenterPosition(
+              cluster,
+              options.width,
+              options.height,
+              options.deltaOffset,
+            ),
+        }
+      } else {
+        const markers: Marker[] = []
+        // add markers of child clusters
+
+        superCluster
+          .getChildren(cluster.properties.cluster_id) // @ts-ignore
+          .forEach((child: Cluster) => {
+            addMarkersToTopCluster(originalMarkers, child, markers)
+          })
+
+        cluster.userExtension = {
+          coordinate: {
+            latitude: cluster.geometry.coordinates[1],
+            longitude: cluster.geometry.coordinates[0],
+          },
+          markers,
+          getCenterPosition: () =>
+            getCenterPosition(
+              cluster,
+              options.width,
+              options.height,
+              options.deltaOffset,
+            ),
+        }
+      }
+    })
+
+    animateMarkersIfNeeded(
+      options.moveSpeed,
+      originalMarkers,
+      animatedMarkers,
+      clusters,
+      nextClusters,
+    )
+
+    setRegion(region)
+    setClusters(nextClusters)
+  }
+
+  /**
+   * Add the markers to the top level cluster.
+   * @param originalMarkers
+   * @param cluster
+   * @param markers
+   */
+  function addMarkersToTopCluster(
+    originalMarkers: Marker[],
+    cluster: Cluster,
+    markers: Marker[],
+  ) {
+    if (cluster.properties.point_count === 0) {
+      const id = cluster.properties.item.id
+      const marker = originalMarkers.find((m: Marker) => m.id === id)
+      if (marker) {
+        markers.push(marker)
+      }
+    } else {
+      superCluster
+        .getChildren(cluster.properties.cluster_id) // @ts-ignore
+        .forEach((child: Cluster) => {
+          addMarkersToTopCluster(originalMarkers, child, markers)
+        })
+    }
+  }
+
+  /**
+   * Render the wrapped component with additional props.
+   */
+  return (
+    <WrappedComponent
+      {...props}
+      region={region}
+      clusters={clusters}
+      onRegionChanged={onRegionChanged}
+      animatedMarkers={animatedMarkers}
+    />
+  )
 }
