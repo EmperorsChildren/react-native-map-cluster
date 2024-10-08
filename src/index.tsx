@@ -397,17 +397,21 @@ export const withAnimatedCluster = (options: {
 
 interface T extends OriginalProps {}
 
-export const withAnimatedClusterFunc = (
+export function AnimatedClusterFunc({
+  options,
+  WrappedComponent,
+  props,
+}: {
   options: {
     width: number
     height: number
     deltaOffset: 1.3
     superClusterProvider: () => Supercluster
     moveSpeed: 600
-  },
-  WrappedComponent: React.ComponentType<T & InjectedProps>,
-  props: T,
-) => {
+  }
+  WrappedComponent: React.ComponentType<T & InjectedProps>
+  props: T
+}) {
   const prevMarkers = useRef(props.markers)
 
   const [animatedMarkers, setAnimatedMarkers] = useState<Array<AnimatedMarker>>(
@@ -420,6 +424,7 @@ export const withAnimatedClusterFunc = (
 
   useEffect(() => {
     initialize()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   /**
@@ -458,6 +463,7 @@ export const withAnimatedClusterFunc = (
     superCluster.load(defaultClusters)
 
     onRegionChanged(region)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [animatedMarkers])
 
   /**
@@ -474,21 +480,21 @@ export const withAnimatedClusterFunc = (
    * Recreate the cluster by new Region.
    * Call on onRegionChangeCompleted
    *
-   * @param region currentRegion
+   * @param currentRegion currentRegion
    */
-  function onRegionChanged(region: Region) {
+  function onRegionChanged(currentRegion: Region) {
     const delta =
-      region.longitudeDelta < 0
-        ? region.latitudeDelta + 360
-        : region.longitudeDelta
+      currentRegion.longitudeDelta < 0
+        ? currentRegion.latitudeDelta + 360
+        : currentRegion.longitudeDelta
     const boundingBox: [number, number, number, number] = [
-      region.longitude - delta,
-      region.latitude - region.latitudeDelta,
-      region.longitude + delta,
-      region.latitude + region.latitudeDelta,
+      currentRegion.longitude - delta,
+      currentRegion.latitude - currentRegion.latitudeDelta,
+      currentRegion.longitude + delta,
+      currentRegion.latitude + currentRegion.latitudeDelta,
     ]
     const viewport =
-      region.longitudeDelta >= 40
+      currentRegion.longitudeDelta >= 40
         ? { zoom: 1 }
         : GeoViewport.viewport(boundingBox, [options.width, options.height])
 
@@ -518,7 +524,6 @@ export const withAnimatedClusterFunc = (
       } else {
         const markers: Marker[] = []
         // add markers of child clusters
-
         superCluster
           .getChildren(cluster.properties.cluster_id) // @ts-ignore
           .forEach((child: Cluster) => {
@@ -550,7 +555,7 @@ export const withAnimatedClusterFunc = (
       nextClusters,
     )
 
-    setRegion(region)
+    setRegion(currentRegion)
     setClusters(nextClusters)
   }
 
