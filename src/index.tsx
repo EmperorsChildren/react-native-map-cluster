@@ -395,7 +395,7 @@ export const withAnimatedCluster = (options: {
   }
 }
 
-interface T extends OriginalProps {}
+// interface T extends OriginalProps {}
 
 export function AnimatedClusterFunc({
   options,
@@ -409,8 +409,10 @@ export function AnimatedClusterFunc({
     superClusterProvider: () => Supercluster
     moveSpeed: 600
   }
-  WrappedComponent: React.ComponentType<T & InjectedProps>
-  props: T
+  WrappedComponent: React.ComponentType<OriginalProps & InjectedProps>
+  props: OriginalProps
+  // WrappedComponent: React.ComponentType<T & InjectedProps>
+  // props: T
 }) {
   const prevMarkers = useRef(props.markers)
 
